@@ -100,11 +100,11 @@ When you run this command, you should be greeted by an empty page that pops up a
 While the `clj` tool offers us all of the options that we need to build and run our code, it is a hassle type out `clj -m cljs.main --compile my-cljs-project.core --repl` every time we want to start up our application. A `deps.edn` file lets us specify script aliases that allow us to declare a shorthand for a number of commands or even run a Clojure file.
 
 ```clojure
-;; ...
-:aliases
-  {:dev {:main-opts ["-m" "cljs.main"
-                     "--compile" "my-cljs-project.core"
-                     "--repl"]}}
+{:deps ;; ...
+ :aliases
+   {:dev {:main-opts ["-m" "cljs.main"
+                      "--compile" "my-cljs-project.core"
+                      "--repl"]}}}
 ```
 
 _deps.edn_
