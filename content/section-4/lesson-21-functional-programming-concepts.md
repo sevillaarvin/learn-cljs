@@ -161,7 +161,7 @@ While we need side effects, we should strive to segregate functions that perform
 
 ```clojure
 (defn update-output [_]
-  (if (= :celsius (get-input-uom))
+  (if (= :celsius (get-input-unit))
     (do (set-output-temp (c->f (get-input-temp)))
         (gdom/setTextContent output-unit-target "F"))
     (do (set-output-temp (f->c (get-input-temp)))
@@ -171,21 +171,21 @@ While we need side effects, we should strive to segregate functions that perform
 While this code gets the job done, it is not especially clean or elegant because it both performs a conversion and does I/O. In order to test this code, we need to run it on a page where all of the elements exist, and in order to test it, we would have to manually set the input fields, call the function, then assert on the content of the output element. Instead, we could refactor this into several pure functions: a pure function to get the label, a pure function to perform the conversion, and an impure function that reads from and mutates the DOM.
 
 ```clojure
-(defn target-label-for-input-unit [unit]                   ;; <1>
+(defn target-label-for-output-unit [unit]          ;; <1>
   (case unit
-    :fahrenheit "F"
-    :celsius "C"))
+    :fahrenheit "C"
+    :celsius "F"))
 
-(defn convert [unit temp]                                  ;; <2>
-  (if (= :celsius unit)
+(defn convert [unit temp]                          ;; <2>
+  (if (= unit :celsius)
     (c->f temp)
     (f->c temp)))
 
-(defn update-output [_]                                    ;; <3>
+(defn update-output [_]                            ;; <3>
   (let [unit (get-input-unit)
         input-temp (get-input-temp)
         output-temp (convert unit input-temp)
-        output-label (target-label-for-input-unit unit)]
+        output-label (target-label-for-output-unit unit)]
     (set-output-temp output-temp)
     (gdom/setTextContent output-unit-target output-label)))
 ```
@@ -402,7 +402,7 @@ As in object-oriented programming, the strategy pattern is a way to separate the
 
 The final pattern that we will consider is the middleware pattern. This pattern allows us to declare "hooks" in a request/response cycle that can transform the request on the way in, the response on the way out, or both. It can even be used to short-circuit a request.
 
-Imagine that we need to make a call to some API, but we want to be able to validate the request before it is sent. We could add the validation logic directly to the function that performs the API request, but this is less than ideal for two reasons: first, it couples validation logic to API logic, and second, it makes our app less testable by combining both pure and impure business logic in the same function. No problem, let's add separate validation function:
+Imagine that we need to make a call to some API, but we want to be able to validate the request before it is sent. We could add the validation logic directly to the function that performs the API request, but this is less than ideal for two reasons: first, it couples validation logic to API logic, and second, it makes our app less testable by combining both pure and impure business logic in the same function. No problem, let's add a separate validation function:
 
 ```clojure
 (defn handler [req]
@@ -477,7 +477,7 @@ Returning to the wrapped API handler example above, writing the validation and l
 
 ## Summary
 
-In this lesson, we looked briefly at three cornerstones of functional programming: minimizing and segregating the side effects, using immutable data, and keeping our business logic referentially transparent. When we these ideas, we naturally write programs that take a piece of data, pass it through a number of transformations, and the result is the output of the program. In reality, most programs are made up of many pure data pipelines that are glued together with impure code that interacts with the DOM, but if we follow the functional programming concepts that we have learned in this lesson, we will end up with a clean functional core of business logic that is primarily concerned with data transformation. Over the next few lessons, we will learn more language features and techniques that will enable us to be effective practitioners of functional programming.
+In this lesson, we looked briefly at three cornerstones of functional programming: minimizing and segregating the side effects, using immutable data, and keeping our business logic referentially transparent. When we apply these ideas, we naturally write programs that take a piece of data, pass it through a number of transformations, and the result is the output of the program. In reality, most programs are made up of many pure data pipelines that are glued together with impure code that interacts with the DOM, but if we follow the functional programming concepts that we have learned in this lesson, we will end up with a clean functional core of business logic that is primarily concerned with data transformation. Over the next few lessons, we will learn more language features and techniques that will enable us to be effective practitioners of functional programming.
 
 [^1]: _Design Patterns: Elements of Reusable Object-Oriented Software_ by  Erich Gamma, John Vlissides, Richard Helm, and Ralph Johnson
 [^2]: [Design Patterns in Dynamic Languages](http://www.norvig.com/design-patterns/)
